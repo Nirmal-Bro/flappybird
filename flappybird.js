@@ -41,6 +41,7 @@ let wingSound = new Audio("./jumpaudio.mp3");
 let hitSound = new Audio("./gameoveraudio.mp3");
 
 window.onload = function() {
+    document.addEventListener("touchstart", moveBird);
     board = document.getElementById("board");
     board.height = boardHeight;
     board.width = boardWidth;
