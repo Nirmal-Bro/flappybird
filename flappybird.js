@@ -150,7 +150,8 @@ function placePipes() {
 }
 
 function moveBird(e) {
-    if (e.code == "Space" || e.code == "ArrowUp" || e.code == "KeyX") {
+    if (  e.type === "touchstart" || e.code == "Space" || e.code == "ArrowUp" || e.code == "KeyX") {
+        e.preventDefault(); // stops zoom/scroll on mobile
 
         wingSound.play();
         //jump
