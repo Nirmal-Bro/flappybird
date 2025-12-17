@@ -80,8 +80,8 @@
     bottomPipeImg.src = "bottompipe.png";
 
     // ===== SOUNDS =====
-    const wingSound = new Audio("jumpaudio.mp3");
-    const hitSound = new Audio("gameoveraudio.mp3");
+    const wingSound = new Audio("hahaha.m4a");
+    const hitSound = new Audio("gameover.m4a");
 
     // ===== INPUT =====
     document.addEventListener("keydown", control);
@@ -96,6 +96,11 @@
       if (canRestart) resetGame();
       return;
     }
+    wingSound.currentTime = 0; // rewind sound
+    wingSound.play();
+
+
+    
 
     // Start game
     if (!gameOver && gameStarted) {
