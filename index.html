@@ -59,19 +59,11 @@
 
     // ===== GAME =====
     let score = 0;
-    let gameOver = false;
-    let startTime = Date.now();
-    let elapsedTime = 0;
-
-    let canRestart = false;
-    let cooldownTime = 5; // seconds
-    let cooldownStart = 0;
-    let gameStarted = false;
-
+    let gameOver = false;z
 
     // ===== IMAGES =====
     const birdImg = new Image();
-    birdImg.src = "thamarabg.png";
+    birdImg.src = "sreyabgremoved.png";
 
     const topPipeImg = new Image();
     topPipeImg.src = "toppipe.png";
@@ -88,95 +80,57 @@
     document.addEventListener("touchstart", control);
 
     function control(e) {
-  if (e.type === "touchstart" || e.code === "Space") {
-    e.preventDefault();
+      if (e.type === "touchstart" || e.code === "Space") {
+        e.preventDefault();
+        bird.velocity = jump;
+        wingSound.play();
 
-    // Restart after cooldown
-    if (gameOver) {
-      if (canRestart) resetGame();
-      return;
+        if (gameOver) resetGame();
+      }
     }
-
-    // Start game
-    if (!gameOver && gameStarted) {
-  bird.velocity += gravity;
-  bird.y += bird.velocity;
-
-  for (let i = 0; i < pipes.length; i++) {
-    pipes[i].x -= 2;
-  }
-}
-
-
-    bird.velocity = jump;
-    wingSound.play();
-  }
-}
-
-
 
     // ===== GAME LOOP =====
     function update() {
-  ctx.clearRect(0, 0, board.width, board.height);
+      ctx.clearRect(0, 0, board.width, board.height);
 
-  // ===== TIMER =====
-  elapsedTime = Math.floor((Date.now() - startTime) / 1000);
+      // Bird
+      bird.velocity += gravity;
+      bird.y += bird.velocity;
+      ctx.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
 
-  // ===== GAME LOGIC ONLY IF NOT GAME OVER =====
-  if (!gameOver) {
-    // Bird physics
-    bird.velocity += gravity;
-    bird.y += bird.velocity;
+      if (bird.y + bird.height >= board.height) {
+        endGame();
+      }
 
-    // Pipes
-    for (let i = 0; i < pipes.length; i++) {
-      pipes[i].x -= 2;
+      // Pipes
+      for (let i = 0; i < pipes.length; i++) {
+        pipes[i].x -= 2;
+        ctx.drawImage(pipes[i].img, pipes[i].x, pipes[i].y, pipeWidth, pipeHeight);
+
+        if (!pipes[i].scored && pipes[i].x + pipeWidth < bird.x) {
+          score += 0.5;
+          pipes[i].scored = true;
+        }
+
+        if (collision(bird, pipes[i])) {
+          endGame();
+        }
+      }
+
+      pipes.filter(p => p.x + pipeWidth > 0);
+
+      // Score
+      ctx.fillStyle = "white";
+      ctx.font = "32px Arial";
+      ctx.fillText(Math.floor(score), 10, 40);
+
+      if (gameOver) {
+        ctx.fillText("GAME OVER", 90, 300);
+        ctx.fillText("Tap to Restart", 80, 350);
+      }
+
+      if (!gameOver) requestAnimationFrame(update);
     }
-  }
-
-  // Draw bird
-  ctx.drawImage(birdImg, bird.x, bird.y, bird.width, bird.height);
-
-  // Draw pipes
-  for (let i = 0; i < pipes.length; i++) {
-    ctx.drawImage(pipes[i].img, pipes[i].x, pipes[i].y, pipeWidth, pipeHeight);
-
-    if (!pipes[i].scored && pipes[i].x + pipeWidth < bird.x) {
-      score += 0.5;
-      pipes[i].scored = true;
-    }
-
-    if (!gameOver && collision(bird, pipes[i])) {
-      endGame();
-    }
-  }
-
-  // ===== UI =====
-  ctx.fillStyle = "white";
-  ctx.font = "32px Arial";
-  ctx.fillText(Math.floor(score), 10, 40);
-
-  ctx.font = "20px Arial";
-  ctx.fillText("Time: " + elapsedTime + "s", 220, 40);
-
-  // ===== GAME OVER UI =====
-  if (gameOver) {
-    const remaining = cooldownTime - Math.floor((Date.now() - cooldownStart) / 1000);
-
-    ctx.font = "32px Arial";
-    ctx.fillText("GAME OVER", 90, 280);
-
-    if (remaining > 0) {
-      ctx.font = "22px Arial";
-      ctx.fillText("Restart in " + remaining + "s", 95, 330);
-    } else {
-      canRestart = true;
-      ctx.fillText("Tap to Restart", 95, 330);
-    }
-  }
-
-  requestAnimationFrame(update);
-}
 
     // ===== PIPE CREATION =====
     function createPipe() {
@@ -198,31 +152,18 @@
 
     // ===== GAME STATE =====
     function endGame() {
-  if (!gameOver) {
-    hitSound.play();
-    gameOver = true;
-    canRestart = false;
-    cooldownStart = Date.now();
-  }
-}
+      hitSound.play();
+      gameOver = true;
+    }
 
-
-  function resetGame() {
-  bird.y = board.height / 2;
-  bird.velocity = 0;
-
-  pipes.length = 0;
-  score = 0;
-
-  gameOver = false;
-  canRestart = false;
-  gameStarted = false; //
-
-  startTime = Date.now();
-}
-
-
-
+    function resetGame() {
+      bird.y = board.height / 2;
+      bird.velocity = 0;
+      pipes.length = 0;
+      score = 0;
+      gameOver = false;
+      update();
+    }
 
     // ===== START =====
     setInterval(() => {
